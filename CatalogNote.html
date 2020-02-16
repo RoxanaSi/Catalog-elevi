@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>ListaElevi</title>
+		<meta charset="UTF-8">
+		<style>
+			body, html {
+			height: 100%;
+			}
+			.lista_elevi_wrapper{
+                background-color: rgb(39, 238, 20);
+				height: 100%;
+				flex:1;
+            }
+            .note_elev_wrapper{
+				height: 100%;
+                background-color: turquoise;
+				flex:1;						    	          
+			}
+
+			.hidden{
+				display: none;
+			}
+
+            .cadru{
+				margin: 0;
+                display: flex;			           
+            }
+
+			#primulCadru{
+				border-style: solid;
+  				border-width: thin;
+				margin: 10px;
+			}
+
+			#cadrulDoi{
+				border-style: solid;
+  				border-width: thin;
+				margin: 10px;
+			}
+			#primulCadruDoi{
+				border-style: solid;
+  				border-width: thin;
+				margin: 10px;
+			}
+			#cadrulDoiDoi{
+				border-style: solid;
+  				border-width: thin;
+				margin: 10px;
+			}			
+			.numeElevNotat{
+				font-weight: bold;
+				font-size: 30px;
+			}
+			#listaElevi{
+				font-weight: bold;
+				font-size: 30px;
+				margin:10px;
+				margin-top: 50px;	
+			}
+			#pagina2{
+				margin-left:auto; 
+            	margin-right:auto;
+			}
+
+		</style>
+		<script>
+
+			class Elev{
+				constructor(nume){
+					this.nume = nume;
+					this.note = [];
+				}
+				adaugaNota(nota){
+					if(typeof nota==="string"){
+						this.note.push(Number(nota));
+					}else{
+						this.note.push(nota);
+					}
+				}
+				get medie(){					
+					var sum = 0;
+					for(var i=0;i<this.note.length;i++){
+						sum += this.note[i];
+					}
+					if(this.note.length == 0){
+						return " ";
+					}
+					
+					return sum/this.note.length;
+				}			
+			}
+
+			class Catalog{
+				constructor(){
+					this.elevi=[];
+				}
+				addElev(str){
+					var elev = new Elev(str);
+					this.elevi.push(elev);
+				}
+				veziNote(idx){
+					var elev = this.elevi[idx];
+					this.elevAscultat = elev;
+				}
+				sortAsc(){
+					this.elevi.sort(function(a,b){
+						return a.medie - b.medie;								
+					});
+				}
+				sortDesc(){
+					this.elevi.sort(function(a,b){
+						return b.medie - a.medie;
+					});
+				}
+				addNota(str){
+					this.elevAscultat.adaugaNota(str);
+				}
+				sortAscNote(){
+					this.elevAscultat.note.sort(function(a,b){
+						return a-b;
+					});
+				}
+				sortDescNote(){
+					this.elevAscultat.note.sort(function(a,b){
+						return b-a;
+					});
+				}
+
+			}
+			
+			var catalog = new Catalog();
+			
+			function onClickAddElev(){
+				var numeElev = document.querySelector("#elevAdaugat").value;
+					if (numeElev.length == 0){
+						alert ("Introduceti numele elevului!");
+					}else {
+						catalog.addElev(numeElev);
+					}
+					document.querySelector("#elevAdaugat").value = null;				
+				drawElevi();
+			}
+			function onClickVeziNote(idx){
+				catalog.veziNote(idx);
+				document.querySelector("#paginaNota").classList.remove("hidden");		
+				drawNote();				  				
+			}
+			
+			function onClickSortAscMedie(){
+				catalog.sortAsc();
+				drawElevi();
+			}
+			function onClickSortDescMedie(){
+				catalog.sortDesc();
+				drawElevi();
+			}
+			function onClickAddNota(){
+				var notaElev = document.querySelector("#notaAdaugata").value;
+				if (notaElev.length == 0){
+						alert ("Introduceti nota elevului!");
+					}else {
+						catalog.addNota(notaElev);
+					}	
+				document.querySelector("#notaAdaugata").value=null;
+				drawNote();
+				drawElevi();
+			}
+			function onClickSortNoteAsc(){
+				catalog.sortAscNote();
+				drawNote();
+			}
+			function onClickSortNoteDesc(){
+				catalog.sortDescNote();
+				drawNote();
+			}
+
+			function drawElevi(){				
+				var str = "";
+				for(var i=0;i<catalog.elevi.length;i++){
+					var elev = catalog.elevi[i];					
+					str+=`
+						<tr>
+							<td>${elev.nume}</td>
+							<td>${elev.medie}</td>
+							<td><button onclick="onClickVeziNote(${i})">Vezi Note</button></td>
+						</tr>
+					`
+				}
+				document.querySelector("#elevi").innerHTML = str;
+			}
+			function drawNote(){						
+				var note = catalog.elevAscultat.note;
+				var str = ""
+				for(var i=0;i<note.length;i++){
+					var nota = note[i];
+					str+=`
+						<tr>
+							<td>${nota}</td>
+						</tr>
+					`
+				}			
+				document.querySelector("#note").innerHTML = str;
+				document.querySelector("#numeElevNotat").innerHTML = catalog.elevAscultat.nume;
+			}
+			
+			function addEnterElev(event){
+				var x=event.keyCode;
+				if (x==13){
+					onClickAddElev(event);				  
+				}				
+			}
+			function addEnterNota(event){
+				var x=event.keyCode;
+				if (x==13){
+					onClickAddNota(event);				  
+				}				
+			}
+
+			function returnToFirstPage(){	
+				event.preventDefault(); 			
+				document.querySelector("#paginaNota").classList.add("hidden");	
+			}
+			
+		</script>
+	</head>
+	<body class="cadru">
+        <div class="lista_elevi_wrapper">
+			<p id="listaElevi">Lista elevi</p>
+				<br>    
+			<div id="primulCadru">
+				<strong>Nume:</strong> <input id="elevAdaugat" type="text" name="nume" onkeypress="addEnterElev(event)"> <button type="button" onclick="onClickAddElev();"> Adauga elev</button>
+			</div> 
+				<br>
+			<div id="cadrulDoi">
+				<button type="button" onclick="onClickSortAscMedie();">Sorteaza ascendent dupa medie note</button> <br>
+				<button type="button" onclick="onClickSortDescMedie();">Sorteaza descendent dupa medie note</button>
+				<table>
+					<thead>
+						<tr>
+							<th>Nume</th>
+							<th>Medie note</th>                        
+						</tr>
+					</thead>
+					<tbody id="elevi">
+
+					</tbody>
+				</table>
+			</div>
+        </div>
+
+        <div class="note_elev_wrapper hidden" id="paginaNota">
+			<button type="button" onclick="returnToFirstPage();"> Ascunde note </button>
+			<p class="numeElevNotat">Note elev: <span id="numeElevNotat"></span></p> 		   
+			<div id="primulCadruDoi">
+				<strong>Nota:</strong> <input id="notaAdaugata" type="number" name="Nume" onkeypress="addEnterNota(event)"> <button type="button" onclick="onClickAddNota();"> Adauga nota</button>
+			</div> 
+				<br>
+			<div id="cadrulDoiDoi">
+				<button type="button" onclick="onClickSortNoteAsc();">Sorteaza ascendent notele</button> <br>
+				<button type="button" onclick="onClickSortNoteDesc();">Sorteaza descendent notele</button>
+				<table id="pagina2" >
+					<thead>
+						<tr>
+							<th>Nota</th>                     
+						</tr>
+					</thead>
+					<tbody id="note" >
+						
+					</tbody>
+				</table>
+
+			</div>
+        </div>		
+     </body
+</html>
